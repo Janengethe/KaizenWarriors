@@ -14,6 +14,7 @@ from models import About
 def hello():
     return "Hello World!"
 
+
 @app.route("/name/<name>")
 def get_name(name):
     return "name : {}".format(name)
