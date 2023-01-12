@@ -1,5 +1,6 @@
 from app import db
 from sqlalchemy.dialects.postgresql import ENUM
+import bcrypt
 
 class About(db.Model):
     __tablename__ = 'about'
@@ -22,13 +23,29 @@ class About(db.Model):
             'about':self.about
         }
 
-class User(db.Model):
-    role_enum = ENUM('owner', 'member', name='role_enum')
+class Users(db.Model):
+    __tablename__ = 'users'
+
+    role_enum = ENUM('Owner', 'Member', name='role_enum')
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
     role = db.Column(role_enum, nullable=False)
+
+    def set_password(self, password):
+        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        return self.password
+
+# class Users(db.Model):
+#     __tablename__ = 'users'
+
+#     role_enum = ENUM('Owner', 'Member', name='role_enum')
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(255))
+#     email = db.Column(db.String(255), unique=True)
+#     password = db.Column(db.String(255))
+#     role = db.Column(role_enum, nullable=False)
 
 
 # class User(db.Model):
