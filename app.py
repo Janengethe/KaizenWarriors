@@ -1,6 +1,8 @@
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, redirect, url_for, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash
+from flask_login import current_user, login_required, login_user, logout_user, LoginManager
 
 app = Flask(__name__)
 
@@ -8,89 +10,69 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from models import About, Users
+from models import Users
+import helpers
+from forms import LoginForm, RegisterForm
 
-@app.route("/")
-def hello():
-    return "Hello World!"
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Please, Login to continue'
 
 
-@app.route("/name/<name>")
-def get_name(name):
-    return "name : {}".format(name)
+@login_manager.user_loader
+def load_user(users_id):
+    """Locate user by id"""
+    return Users.query.get(int(users_id))
 
-@app.route("/details")
-def get_details():
-    name=request.args.get('name')
-    about=request.args.get('about')
-    return "Name : {}, About: {}".format(name,about)
+app.url_map.strict_slashes = False
 
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         name = request.form['name']
-#         email = request.form['email']
-#         password = request.form['password']
-#         role = request.form['role']
-#         new_user = User(name=name, email=email, password=password, role=role)
-#         db.session.add(new_user)
-#         db.session.commit()
-#         flash('You are registered!')
-#         return redirect(url_for('login'))
-#     return render_template('register.html')
-
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         name = request.form['name']
-#         email = request.form['email']
-#         password = request.form['password']
-#         role = request.form['role']
-
-#         new_user = Users(name=name, email=email, role=role)
-#         new_user.password = new_user.password = new_user.set_password(password)
-#         db.session.add(new_user)
-#         db.session.commit()
-#         return jsonify({'message': 'New user created successfully.'}), 201
-#     return render_template('register.html')
+@app.route('/')
+def index():
+    return ("Hello Home!")
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        password = request.form['password']
-        role = request.form['role']
+    uin = helpers.logged_in(current_user)
 
-        # check if email already exists
-        existing_user = Users.query.filter_by(email=email).first()
-        if existing_user:
-            return jsonify({'error': 'Email already exists'}), 400
+    form = RegisterForm()
+    if form.validate_on_submit():
+        name=form.name.data
+        email=form.email.data
+        password=form.password.data
+        role=form.role.data
         
-        # check if the password is strong
-        if not is_strong_password(password):
-            return jsonify({'error': 'Password is not strong'}), 400
-        
-        new_user = Users(name=name, email=email, role=role)
-        new_user.password = new_user.set_password(password)
+        new_user = Users(name=name, email=email, password=password, role=role)
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({'message': 'New user created successfully.'}), 201
-    return render_template('register.html')
+        flash('New user {} with email {} created successfully.'.format(name, email))
+        login_user(new_user)
+        return redirect(url_for('index'))
 
-def is_strong_password(password):
-    """
-    Function to check if a password is strong enough
-    """
-    if len(password) < 8:
-        return False
-    if not any(char.isdigit() for char in password):
-        return False
-    if not any(char.isupper() for char in password):
-        return False
-    if not any(char.islower() for char in password):
-        return False
-    return True
+    return render_template('register.html', uin=uin, form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        user = Users.query.filter_by(email=email).first()
+        if user and check_password_hash(user.password, form.password.data):
+            login_user(user)
+            flash('Welcome {}!'.format(email))
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid email or password')
+            return redirect(url_for('login'))
+    return render_template('login.html', form=form)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    flash('See you later!')
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
