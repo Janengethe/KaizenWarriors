@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check-in</title>
+</head>
+<body>
+    <h1>Check-in</h1>
+    <form method="POST" action="{{ url_for('checkin') }}">
+        <label>Workout:</label>
+        <input type="text" name="workout">
+        <input type="submit" value="Check-in">
+    </form>
+    
+</body>
+</html>

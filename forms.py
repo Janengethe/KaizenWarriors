@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, HiddenField, SelectField
+from wtforms import DateField, FieldList, FormField, FloatField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, SelectField
 from wtforms.validators import Email, EqualTo, Length
-from wtforms.validators import InputRequired, ValidationError
+from wtforms.validators import InputRequired, ValidationError, DataRequired, NumberRange
 
 from models import Users
 
@@ -32,3 +33,21 @@ class LoginForm(FlaskForm):
         if not user:
             raise ValidationError("Email not registered!")
         return
+
+class PersonalRecordForm(FlaskForm):
+    max_bench_press = IntegerField('Max Bench Press', validators=[DataRequired(), NumberRange(min=0, max=1000)])
+    max_deadlift = IntegerField('Max Deadlift', validators=[DataRequired(), NumberRange(min=0, max=1000)])
+    max_squat = IntegerField('Max Squat', validators=[DataRequired(), NumberRange(min=0, max=1000)])
+    submit = SubmitField('Save')
+
+
+class ExerciseForm(FlaskForm):
+    exercise = StringField('exercise', validators=[DataRequired(), Length(min=3, max=255)])
+    sets = IntegerField('sets', validators=[DataRequired()])
+    reps = IntegerField('reps', validators=[DataRequired()])
+    weight = FloatField('weight', validators=[DataRequired()])
+
+class WorkoutForm(FlaskForm):
+    date = DateField('date', validators=[DataRequired()])
+    exercises = FieldList(FormField(ExerciseForm), min_entries=8)
+    submit = SubmitField('Add Workout')

@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import Flask, request, redirect, url_for, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
@@ -10,9 +11,9 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from models import Users
+from models import Users, Membership, Packages, Checkins, Workout, PersonalRecord
 import helpers
-from forms import LoginForm, RegisterForm
+from forms import LoginForm, RegisterForm, PersonalRecordForm, WorkoutForm
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -67,6 +68,90 @@ def login():
             flash('Invalid email or password')
             return redirect(url_for('login'))
     return render_template('login.html', form=form)
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    member = Users.query.filter_by(id=current_user.id).first()
+    return render_template('dashboard.html', member=member)
+
+@app.route('/users')
+@login_required
+def get_users():
+    if current_user.role != "Owner":
+        return "You are not authorized to view this page."
+    else:
+        users = Users.query.all()
+        return render_template('users.html', users=users)
+
+@app.route('/add_personal_record', methods=['GET', 'POST'])
+@login_required
+def add_personal_record():
+    form = PersonalRecordForm()
+    if form.validate_on_submit():
+        # Create a new personal record
+        new_personal_record = PersonalRecord(
+            max_bench_press=form.max_bench_press.data,
+            max_deadlift=form.max_deadlift.data,
+            max_squat=form.max_squat.data,
+            date=datetime.now(),
+            user_id=current_user.id
+        )
+        db.session.add(new_personal_record)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('add_personal_record.html', form=form)
+
+
+@app.route('/view_personal_records')
+@login_required
+def view_personal_records():
+    pr = PersonalRecord.query.filter_by(user_id=current_user.id).all()
+    return render_template('personal_records.html', pr=pr)
+
+@app.route('/workout', methods=['GET','POST'])
+def create_workout():
+    form = WorkoutForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(email=form.email.data).first()
+        workouts = []
+        for workout in form.exercises.data:
+            new_workout = Workout(user_id=user.id, date=form.date.data, exercise=workout['exercise'], sets=workout['sets'], reps=workout['reps'], weight=workout['weight'])
+            db.session.add(new_workout)
+            workouts.append(new_workout)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('workout_form.html', form=form)
+
+
+@app.route('/checkin', methods=['GET', 'POST'])
+@login_required
+def checkin():
+    if request.method == 'POST':
+        # handle check-in form submission
+        workout = request.form['workout']
+        date = datetime.now()
+        new_checkin = Checkins(workout=workout, date=date, user_id=current_user.id)
+        db.session.add(new_checkin)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    else:
+        return render_template('checkin.html')
+
+@app.route('/cancel_membership')
+@login_required
+def cancel_membership():
+    member = Users.query.filter_by(id=current_user.id).first()
+    db.session.delete(member)
+    db.session.commit()
+    logout_user()
+    return redirect(url_for('index'))
+
+@app.route('/purchase_sessions')
+@login_required
+def purchase_sessions():
+    return render_template('purchase_sessions.html')
+
 
 @app.route('/logout')
 def logout():

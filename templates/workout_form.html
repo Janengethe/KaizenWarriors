@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Workout</title>
+</head>
+<body>
+    <h1>Add Workout</h1>
+    <form method="POST" action="{{ url_for('create_workout') }}">
+        {{ form.hidden_tag() }}
+        {{ form.date.label }} {{ form.date() }}
+        {% for exercise in form.exercises %}
+            {{ exercise.exercise.label }} {{ exercise.exercise() }}
+            {{ exercise.sets.label }} {{ exercise.sets() }}
+            {{ exercise.reps.label }} {{ exercise.reps() }}
+            {{ exercise.weight.label }} {{ exercise.weight() }}
+        {% endfor %}
+        {{ form.submit() }}
+    </form>
+</body>
+</html>

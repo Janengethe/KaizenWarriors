@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Personal Record</title>
+</head>
+<body>
+    <h1>Add Personal Record</h1>
+<form method="POST" action="{{url_for('add_personal_record')}}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.max_bench_press.label }}
+        {{ form.max_bench_press(class="form-control") }}
+        {% for error in form.max_bench_press.errors %}
+            <span class="error">{{ error }}</span>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.max_deadlift.label }}
+        {{ form.max_deadlift(class="form-control") }}
+        {% for error in form.max_deadlift.errors %}
+            <span class="error">{{ error }}</span>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.max_squat.label }}
+        {{ form.max_squat(class="form-control") }}
+        {% for error in form.max_squat.errors %}
+            <span class="error">{{ error }}</span>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary") }}
+    </div>
+</form>
+</body>
+</html>

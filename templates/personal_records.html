@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Personal Records</title>
+</head>
+<body>
+    <h1>Personal Records</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Max Bench Press</th>
+            <th>Max Deadlift</th>
+            <th>Max Squat</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in pr %}
+        <tr>
+            <td>{{ record.max_bench_press }} kgs</td>
+            <td>{{ record.max_deadlift }} kgs</td>
+            <td>{{ record.max_squat }} kgs</td>
+            <td>{{ record.date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
