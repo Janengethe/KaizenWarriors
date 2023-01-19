@@ -1,9 +1,11 @@
 import os
 from datetime import datetime
-from flask import Flask, request, redirect, url_for, render_template, session, flash
+from flask import Flask, request, redirect, url_for, render_template, session,\
+    flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
-from flask_login import current_user, login_required, login_user, logout_user, LoginManager
+from flask_login import current_user, login_required, login_user, logout_user,\
+    LoginManager
 
 app = Flask(__name__)
 
@@ -11,7 +13,8 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from models import Users, Membership, Packages, Checkins, Workout, PersonalRecord
+from models import Users, Membership, Packages, Checkins, Workout,\
+    PersonalRecord
 import helpers
 from forms import LoginForm, RegisterForm, PersonalRecordForm, WorkoutForm
 
@@ -46,7 +49,6 @@ def register():
         new_user = Users(name=name, email=email, password=password, role=role)
         db.session.add(new_user)
         db.session.commit()
-        flash('New user {} with email {} created successfully.'.format(name, email))
         login_user(new_user)
         return redirect(url_for('index'))
 
@@ -116,7 +118,14 @@ def create_workout():
         user = Users.query.filter_by(email=form.email.data).first()
         workouts = []
         for workout in form.exercises.data:
-            new_workout = Workout(user_id=user.id, date=form.date.data, exercise=workout['exercise'], sets=workout['sets'], reps=workout['reps'], weight=workout['weight'])
+            new_workout = Workout(
+                user_id=user.id,
+                date=form.date.data,
+                exercise=workout['exercise'],
+                sets=workout['sets'],
+                reps=workout['reps'],
+                weight=workout['weight']
+                )
             db.session.add(new_workout)
             workouts.append(new_workout)
         db.session.commit()
@@ -131,7 +140,11 @@ def checkin():
         # handle check-in form submission
         workout = request.form['workout']
         date = datetime.now()
-        new_checkin = Checkins(workout=workout, date=date, user_id=current_user.id)
+        new_checkin = Checkins(
+            workout=workout,
+            date=date,
+            user_id=current_user.id
+            )
         db.session.add(new_checkin)
         db.session.commit()
         return redirect(url_for('dashboard'))

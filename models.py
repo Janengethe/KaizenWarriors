@@ -41,7 +41,9 @@ class PersonalRecord(db.Model):
     max_deadlift = db.Column(db.Integer)
     max_squat = db.Column(db.Integer)
     date = db.Column(db.Date)
-    user = db.relationship('Users', backref=db.backref('personal_records', lazy=True))
+    user = db.relationship(
+        'Users', backref=db.backref('personal_records', lazy=True)
+        )
 
 class Workout(db.Model):
     __tablename__ = 'workout'
@@ -73,7 +75,9 @@ class Membership(db.Model):
     package_id = db.Column(db.Integer, db.ForeignKey('packages.id'))
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
-    user = db.relationship('Users', backref=db.backref('memberships', lazy=True))
+    user = db.relationship(
+        'Users', backref=db.backref('memberships', lazy=True)
+        )
 
 class Checkins(db.Model):
     __tablename__ = 'checkins'
