@@ -87,17 +87,27 @@ class PersonalRecordForm(FlaskForm):
         )
     submit = SubmitField('Save')
 
-
-class ExerciseForm(FlaskForm):
-    exercise = StringField(
-        'exercise',
-        validators=[DataRequired(), Length(min=3, max=255)]
-        )
-    sets = IntegerField('sets', validators=[DataRequired()])
-    reps = IntegerField('reps', validators=[DataRequired()])
-    weight = FloatField('weight', validators=[DataRequired()])
-
 class WorkoutForm(FlaskForm):
-    date = DateField('date', validators=[DataRequired()])
-    exercises = FieldList(FormField(ExerciseForm), min_entries=8)
-    submit = SubmitField('Add Workout')
+    date = DateField('Date')
+    submit = SubmitField('Save Workout')
+
+class ExerciseLogForm(FlaskForm):
+    exercise = StringField('Exercise')
+    sets = IntegerField('Sets')
+    reps = IntegerField('Reps')
+    weight = FloatField('Weight')
+    submit = SubmitField('Save Exercise')
+
+# class ExerciseForm(FlaskForm):
+#     exercise = StringField(
+#         'exercise',
+#         validators=[DataRequired(), Length(min=3, max=255)]
+#         )
+#     sets = IntegerField('sets', validators=[DataRequired()])
+#     reps = IntegerField('reps', validators=[DataRequired()])
+#     weight = FloatField('weight', validators=[DataRequired()])
+
+# class WorkoutForm(FlaskForm):
+#     date = DateField('date', validators=[DataRequired()])
+#     exercises = FieldList(FormField(ExerciseForm), min_entries=8)
+#     submit = SubmitField('Add Workout')

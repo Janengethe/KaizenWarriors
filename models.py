@@ -45,17 +45,37 @@ class PersonalRecord(db.Model):
         'Users', backref=db.backref('personal_records', lazy=True)
         )
 
+class ExerciseLog(db.Model):
+    __tablename__ = 'exercise_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    workout_id = db.Column(db.Integer, db.ForeignKey('workout.id'))
+    exercise = db.Column(db.String(255))
+    sets = db.Column(db.Integer)
+    reps = db.Column(db.Integer)
+    weight = db.Column(db.Float)
+    
+    
 class Workout(db.Model):
     __tablename__ = 'workout'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     date = db.Column(db.Date)
-    exercise = db.Column(db.String(255))
-    sets = db.Column(db.Integer)
-    reps = db.Column(db.Integer)
-    weight = db.Column(db.Float)
+    exercise_logs = db.relationship("ExerciseLog", cascade="all, delete-orphan", backref="workout")
     user = db.relationship('Users', backref=db.backref('workouts', lazy=True))
+
+# class Workout(db.Model):
+#     __tablename__ = 'workout'
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+#     date = db.Column(db.Date)
+#     exercise = db.Column(db.String(255))
+#     sets = db.Column(db.Integer)
+#     reps = db.Column(db.Integer)
+#     weight = db.Column(db.Float)
+#     user = db.relationship('Users', backref=db.backref('workouts', lazy=True))
 
 
 class Packages(db.Model):

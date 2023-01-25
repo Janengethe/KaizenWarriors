@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Workouts</title>
+</head>
+<body>
+    <h1>Workouts</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for workout in workouts %}
+                <tr>
+                    <td>{{ workout.date }}</td>
+                    <td>
+                        <a href="{{ url_for('new_exercise_log', workout_id=workout.id) }}">View</a>
+                        <!-- <a href="{{ url_for('new_exercise_log', workout_id=workout.id) }}">Edit</a>
+                        <a href="{{ url_for('new_exercise_log', workout_id=workout.id) }}">Delete</a> -->
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('new_workout') }}">New Workout</a>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>New Workout</title>
+  </head>
+  <body>
+    <h1>New Workout</h1>
+    <form method="post" action="{{ url_for('list_workouts') }}">
+      {{ form.hidden_tag() }}
+      <div>
+        {{ form.date.label }} {{ form.date() }}
+      </div>
+      <div>
+        {{ form.submit() }}
+      </div>
+    </form>
+  </body>
+</html>

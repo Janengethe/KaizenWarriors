@@ -14,9 +14,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 from models import Users, Membership, Packages, Checkins, Workout,\
-    PersonalRecord
+    PersonalRecord, ExerciseLog
 import helpers
-from forms import LoginForm, RegisterForm, PersonalRecordForm, WorkoutForm
+from forms import LoginForm, RegisterForm, PersonalRecordForm, WorkoutForm,\
+    ExerciseLogForm
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -111,26 +112,51 @@ def view_personal_records():
     pr = PersonalRecord.query.filter_by(user_id=current_user.id).all()
     return render_template('personal_records.html', pr=pr)
 
-@app.route('/workout', methods=['GET','POST'])
-def create_workout():
+@app.route('/workouts', methods=['GET', 'POST'])
+def list_workouts():
+    workouts = Workout.query.all()
+    return render_template('list_workouts.html', workouts=workouts)
+    
+@app.route('/workouts/new', methods=['GET', 'POST'])
+def new_workout():
     form = WorkoutForm()
     if form.validate_on_submit():
-        user = Users.query.filter_by(email=form.email.data).first()
-        workouts = []
-        for workout in form.exercises.data:
-            new_workout = Workout(
-                user_id=user.id,
-                date=form.date.data,
-                exercise=workout['exercise'],
-                sets=workout['sets'],
-                reps=workout['reps'],
-                weight=workout['weight']
-                )
-            db.session.add(new_workout)
-            workouts.append(new_workout)
+        workout = Workout(date=form.date.data)
+        db.session.add(workout)
         db.session.commit()
-        return redirect(url_for('dashboard'))
-    return render_template('workout_form.html', form=form)
+        return redirect(url_for('list_workouts'))
+    return render_template('new_workout.html', form=form)
+    
+@app.route('/workouts/<int:workout_id>/exercise_logs/new', methods=['GET', 'POST'])
+def new_exercise_log(workout_id):
+    form = ExerciseLogForm()
+    workout = Workout.query.get(workout_id)
+    if form.validate_on_submit():
+        exercise_log = ExerciseLog(exercise=form.exercise.data, sets=form.sets.data, reps=form.reps.data, weight=form.weight.data, workout=workout)
+        db.session.add(exercise_log)
+        db.session.commit()
+        return redirect(url_for('list_workouts'))
+    return render_template('new_exercise_log.html', form=form, workout=workout)
+# @app.route('/workout', methods=['GET','POST'])
+# def create_workout():
+#     form = WorkoutForm()
+#     if form.validate_on_submit():
+#         user = Users.query.filter_by(email=form.email.data).first()
+#         workouts = []
+#         for workout in form.exercises.data:
+#             new_workout = Workout(
+#                 user_id=user.id,
+#                 date=form.date.data,
+#                 exercise=workout['exercise'],
+#                 sets=workout['sets'],
+#                 reps=workout['reps'],
+#                 weight=workout['weight']
+#                 )
+#             db.session.add(new_workout)
+#             workouts.append(new_workout)
+#         db.session.commit()
+#         return redirect(url_for('dashboard'))
+#     return render_template('workout_form.html', form=form)
 
 
 @app.route('/checkin', methods=['GET', 'POST'])
