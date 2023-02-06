@@ -5,48 +5,6 @@
 </head>
 <body>
     <h1>Welcome {{ member.name }}!</h1>
-<div class="row">
-  <div class="col-md-6">
-    <h2>Quick Links</h2>
-    <ul>
-      <li><a href="{{ url_for('view_personal_records') }}">View Personal Records</a></li>
-      <li><a href="{{ url_for('checkin') }}">Check-in for a workout</a></li>
-      <li><a href="{{ url_for('cancel_membership') }}">Cancel Membership</a></li>
-    </ul>
-  </div>
-  <div class="col-md-6">
-    <h2>Current Package</h2>
-    <p>Remaining Sessions: {{ member.remaining_sessions }}</p>
-    <p>Expiration Date: {{ member.expiration_date }}</p>
-    <p><a href="{{ url_for('purchase_sessions') }}">Purchase Additional Sessions</a></p>
-  </div>
-</div>
-<div class="row">
-  <div class="col-md-6">
-    <h2>Personal Records</h2>
-    <p>Max Bench Press: {{ member.max_bench_press }} lbs</p>
-    <p>Max Deadlift: {{ member.max_deadlift }} lbs</p>
-    <p>Max Squat: {{ member.max_squat }} lbs</p>
-  </div>
-  <div class="col-md-6">
-    <h2>Check-ins</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Workout</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for checkin in member.checkins %}
-        <tr>
-          <td>{{ checkin.date }}</td>
-          <td>{{ checkin.workout }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+    <a href="/update_member/{{ member.id }}">Update Member</a>
 </body>
 </html>

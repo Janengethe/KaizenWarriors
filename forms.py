@@ -63,6 +63,12 @@ class LoginForm(FlaskForm):
             raise ValidationError("Email not registered!")
         return
 
+class UpdateMemberForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    phone_number = StringField('Phone Number', validators=[DataRequired()])
+    submit = SubmitField('Update')
+    
 class PersonalRecordForm(FlaskForm):
     max_bench_press = IntegerField(
         'Max Bench Press',
@@ -111,3 +117,12 @@ class ExerciseLogForm(FlaskForm):
 #     date = DateField('date', validators=[DataRequired()])
 #     exercises = FieldList(FormField(ExerciseForm), min_entries=8)
 #     submit = SubmitField('Add Workout')
+
+class PackageForm(FlaskForm):
+    name = StringField('Name')
+    price = FloatField('Price')
+    duration = IntegerField('Duration')
+
+class CheckinForm(FlaskForm):
+    date = DateField('Date')
+    submit = SubmitField('Check In')

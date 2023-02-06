@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 2a17e4a29969
+Revision ID: 1d8f3f445aeb
 Revises: 
-Create Date: 2023-01-21 08:13:00.876878
+Create Date: 2023-01-26 13:52:54.492759
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '2a17e4a29969'
+revision = '1d8f3f445aeb'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,6 +31,17 @@ def upgrade():
     sa.Column('email', sa.String(length=255), nullable=True),
     sa.Column('password', sa.String(length=255), nullable=True),
     sa.Column('role', postgresql.ENUM('Owner', 'Member', name='role_enum'), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email')
+    )
+    op.create_table('member',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('email', sa.String(length=255), nullable=True),
+    sa.Column('name', sa.String(length=255), nullable=True),
+    sa.Column('phone_number', sa.String(length=255), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -90,6 +101,7 @@ def downgrade():
     op.drop_table('workout')
     op.drop_table('personal_record')
     op.drop_table('membership')
+    op.drop_table('member')
     op.drop_table('users')
     op.drop_table('packages')
     # ### end Alembic commands ###

@@ -14,10 +14,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 from models import Users, Membership, Packages, Checkins, Workout,\
-    PersonalRecord, ExerciseLog
+    PersonalRecord, ExerciseLog, Member
 import helpers
 from forms import LoginForm, RegisterForm, PersonalRecordForm, WorkoutForm,\
-    ExerciseLogForm
+    ExerciseLogForm, PackageForm, UpdateMemberForm, CheckinForm
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -87,6 +87,23 @@ def get_users():
         users = Users.query.all()
         return render_template('users.html', users=users)
 
+@app.route('/update_member/<int:id>', methods=['GET', 'POST'])
+@login_required
+def update_member(id):
+    id = current_user.id
+    form = UpdateMemberForm()
+    if form.validate_on_submit():
+        new_member = Member(
+            email = form.email.data,
+            name = form.name.data,
+            phone_number = form.phone_number.data
+        )
+        db.session.add(new_member)
+        db.session.commit()
+        flash('Your member details have been updated.', 'success')
+        return redirect(url_for('index'))
+    return render_template('update_member.html', form=form)
+
 @app.route('/add_personal_record', methods=['GET', 'POST'])
 @login_required
 def add_personal_record():
@@ -137,27 +154,18 @@ def new_exercise_log(workout_id):
         db.session.commit()
         return redirect(url_for('list_workouts'))
     return render_template('new_exercise_log.html', form=form, workout=workout)
-# @app.route('/workout', methods=['GET','POST'])
-# def create_workout():
-#     form = WorkoutForm()
-#     if form.validate_on_submit():
-#         user = Users.query.filter_by(email=form.email.data).first()
-#         workouts = []
-#         for workout in form.exercises.data:
-#             new_workout = Workout(
-#                 user_id=user.id,
-#                 date=form.date.data,
-#                 exercise=workout['exercise'],
-#                 sets=workout['sets'],
-#                 reps=workout['reps'],
-#                 weight=workout['weight']
-#                 )
-#             db.session.add(new_workout)
-#             workouts.append(new_workout)
-#         db.session.commit()
-#         return redirect(url_for('dashboard'))
-#     return render_template('workout_form.html', form=form)
 
+
+@app.route('/package', methods=['GET', 'POST'])
+def package():
+    form = PackageForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        package = Packages(name=form.name.data, price=form.price.data, duration=form.duration.data)
+        db.session.add(package)
+        db.session.commit()
+        print(package)
+        return redirect('/package')
+    return render_template('package.html', form=form)
 
 @app.route('/checkin', methods=['GET', 'POST'])
 @login_required
