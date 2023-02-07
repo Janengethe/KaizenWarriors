@@ -170,20 +170,13 @@ def package():
 @app.route('/checkin', methods=['GET', 'POST'])
 @login_required
 def checkin():
-    if request.method == 'POST':
-        # handle check-in form submission
-        workout = request.form['workout']
-        date = datetime.now()
-        new_checkin = Checkins(
-            workout=workout,
-            date=date,
-            user_id=current_user.id
-            )
-        db.session.add(new_checkin)
+    form = CheckinForm()
+    if form.validate_on_submit():
+        checkin = Checkins(user_id=current_user.id, date = form.date.data)
+        db.session.add(checkin)
         db.session.commit()
-        return redirect(url_for('dashboard'))
-    else:
-        return render_template('checkin.html')
+        return ('Checked in successfully')
+    return render_template('checkin.html', form=form)
 
 @app.route('/cancel_membership')
 @login_required
