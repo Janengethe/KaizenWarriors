@@ -34,7 +34,7 @@ app.url_map.strict_slashes = False
 
 @app.route('/')
 def index():
-    return ("Hello Home!")
+    return render_template("base.html")
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -65,7 +65,7 @@ def login():
         user = Users.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
-            flash('Welcome {}!'.format(email))
+            flash('Welcome {}!'.format(user.name))
             return redirect(url_for('index'))
         else:
             flash('Invalid email or password')
@@ -75,8 +75,10 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    uin = helpers.logged_in(current_user)
+
     member = Users.query.filter_by(id=current_user.id).first()
-    return render_template('dashboard.html', member=member)
+    return render_template('dashboard.html', member=member, uin=uin)
 
 @app.route('/users')
 @login_required

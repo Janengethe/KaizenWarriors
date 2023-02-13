@@ -1,10 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Welcome {{ member.name }}!</h1>
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block nav %}
+<div class='container'>
+{% if uin %}
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('logout')}}" tabindex="-1" >Logout</a>
+  </li>
+  {% else %}
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('login')}}" tabindex="-1" >Login</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('register')}}" tabindex="-1" >Register</a>
+  </li>
+  {% endif %}
+</div>
+{% endblock %}
+{% block content %}
+<h2>Welcome {{ member.name }}!</h2>
     <a href="/update_member/{{ member.id }}">Update Member</a>
-</body>
-</html>
+{% endblock %}
