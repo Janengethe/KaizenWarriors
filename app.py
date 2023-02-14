@@ -34,7 +34,8 @@ app.url_map.strict_slashes = False
 
 @app.route('/')
 def index():
-    return render_template("base.html")
+    uin = helpers.logged_in(current_user)
+    return render_template("index.html", uin=uin)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
