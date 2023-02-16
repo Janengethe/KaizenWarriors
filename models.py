@@ -33,6 +33,14 @@ class Users(db.Model, UserMixin):
         secure_pw = generate_password_hash(password)
         setattr(self, 'password', secure_pw)
 
+class Checkins(db.Model):
+    __tablename__ = 'checkins'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    user = db.relationship('Users', backref=db.backref('checkins', lazy=True))
+
 class Member(db.Model):
     __tablename__ = 'member'
 
@@ -80,45 +88,11 @@ class Workout(db.Model):
     exercise_logs = db.relationship("ExerciseLog", cascade="all, delete-orphan", backref="workout")
     user = db.relationship('Users', backref=db.backref('workouts', lazy=True))
 
-# class Workout(db.Model):
-#     __tablename__ = 'workout'
+# class Packages(db.Model):
+#     __tablename__ = 'packages'
 
 #     id = db.Column(db.Integer, primary_key=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#     date = db.Column(db.Date)
-#     exercise = db.Column(db.String(255))
-#     sets = db.Column(db.Integer)
-#     reps = db.Column(db.Integer)
-#     weight = db.Column(db.Float)
-#     user = db.relationship('Users', backref=db.backref('workouts', lazy=True))
-
-
-class Packages(db.Model):
-    __tablename__ = 'packages'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-    price = db.Column(db.Float)
-    duration = db.Column(db.Integer)
-    memberships = db.relationship('Membership', backref='package', lazy=True)
-
-class Membership(db.Model):
-    __tablename__ = 'membership'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    package_id = db.Column(db.Integer, db.ForeignKey('packages.id'))
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
-    user = db.relationship(
-        'Users', backref=db.backref('memberships', lazy=True)
-        )
-
-class Checkins(db.Model):
-    __tablename__ = 'checkins'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    date = db.Column(db.Date)
-    membership_id = db.Column(db.Integer, db.ForeignKey('membership.id'))
-    user = db.relationship('Users', backref=db.backref('checkins', lazy=True))
+#     name = db.Column(db.String(255))
+#     price = db.Column(db.Float)
+#     duration = db.Column(db.Integer)
+#     memberships = db.relationship('Membership', backref='package', lazy=True)

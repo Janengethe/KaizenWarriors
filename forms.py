@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from datetime import date, datetime
 from flask_wtf import FlaskForm
 from wtforms import DateField, FieldList, FormField, FloatField
 from wtforms import StringField, PasswordField, SubmitField, IntegerField,\
@@ -7,7 +8,7 @@ from wtforms.validators import Email, EqualTo, Length
 from wtforms.validators import InputRequired, ValidationError, DataRequired,\
     NumberRange
 
-from models import Users
+from models import Users, Checkins
 
 class RegisterForm(FlaskForm):
     name = StringField(
@@ -40,10 +41,17 @@ class RegisterForm(FlaskForm):
         )
     role = SelectField(
         'Role',
-        choices=[('Owner', 'Owner'), ('Member', 'Member')],
+        choices=[('Member', 'Member')],
         validators=[InputRequired()]
         )
     submit = SubmitField('Register')
+
+    # role = SelectField(
+    #     'Role',
+    #     choices=[('Owner', 'Owner'), ('Member', 'Member')],
+    #     validators=[InputRequired()]
+    #     )
+    # submit = SubmitField('Register')
 
     def validate_email(self, email):
         user = Users.query.filter_by(email=email.data).first()
@@ -63,6 +71,23 @@ class LoginForm(FlaskForm):
             raise ValidationError("Email not registered!")
         return
 
+class CheckinForm(FlaskForm):
+    email = StringField('Email', validators=[InputRequired(), Email()])
+    submit = SubmitField('Check In')
+    
+    def validate_email(self, email):
+        user = Users.query.filter_by(email=email.data).first()
+        if not user:
+            raise ValidationError("Email not registered!")
+        userid = user.id
+        now = datetime.now()
+        existing_checkin = Checkins.query.filter_by(user_id=userid).all()
+        for m in existing_checkin:
+            if m.created_at.date() == now.date():
+                raise ValidationError("Member already checked in today!")
+        return
+    
+    
 class UpdateMemberForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
     name = StringField('Name', validators=[DataRequired()])
@@ -122,7 +147,3 @@ class PackageForm(FlaskForm):
     name = StringField('Name')
     price = FloatField('Price')
     duration = IntegerField('Duration')
-
-class CheckinForm(FlaskForm):
-    date = DateField('Date')
-    submit = SubmitField('Check In')

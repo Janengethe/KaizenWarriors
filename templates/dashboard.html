@@ -19,5 +19,5 @@
 {% endblock %}
 {% block content %}
 <h2>Welcome {{ member.name }}!</h2>
-    <a href="/update_member/{{ member.id }}">Update Member</a>
+<a class="nav-link" href="{{ url_for('checkin')}}" tabindex="-1" >Check In</a>
 {% endblock %}

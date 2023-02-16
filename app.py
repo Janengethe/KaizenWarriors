@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import date, datetime
 from flask import Flask, request, redirect, url_for, render_template, session,\
     flash
 from flask_sqlalchemy import SQLAlchemy
@@ -13,7 +13,7 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from models import Users, Membership, Packages, Checkins, Workout,\
+from models import Users, Checkins, Workout,\
     PersonalRecord, ExerciseLog, Member
 import helpers
 from forms import LoginForm, RegisterForm, PersonalRecordForm, WorkoutForm,\
@@ -52,7 +52,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
     return render_template('register.html', uin=uin, form=form)
 
@@ -67,7 +67,7 @@ def login():
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
             flash('Welcome {}!'.format(user.name))
-            return redirect(url_for('index'))
+            return redirect(url_for('dashboard'))
         else:
             flash('Invalid email or password')
             return redirect(url_for('login'))
@@ -89,6 +89,31 @@ def get_users():
     else:
         users = Users.query.all()
         return render_template('users.html', users=users)
+
+@app.route('/checkin', methods=['GET', 'POST'])
+@login_required
+def checkin():
+    uin = helpers.logged_in(current_user)
+
+    if current_user.role != "Owner":
+        return "Please ask an official to check you in"
+    else:
+        form = CheckinForm()
+        members = Users.query.filter_by(role='Member').all()
+        for member in members:
+            check_email = member.email
+            user_id = member.id
+            if form.validate_on_submit():
+                email = form.email.data
+                if email == check_email:
+                    checkin = Checkins(user_id=member.id)
+                    db.session.add(checkin)
+                    db.session.commit()
+                    flash("{} Checked in.".format(member.name))
+                    return redirect(url_for('dashboard'))
+
+    return render_template('checkin.html', form=form, uin=uin)
+
 
 @app.route('/update_member/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -159,41 +184,31 @@ def new_exercise_log(workout_id):
     return render_template('new_exercise_log.html', form=form, workout=workout)
 
 
-@app.route('/package', methods=['GET', 'POST'])
-def package():
-    form = PackageForm()
-    if request.method == 'POST' and form.validate_on_submit():
-        package = Packages(name=form.name.data, price=form.price.data, duration=form.duration.data)
-        db.session.add(package)
-        db.session.commit()
-        print(package)
-        return redirect('/package')
-    return render_template('package.html', form=form)
+# @app.route('/package', methods=['GET', 'POST'])
+# def package():
+#     form = PackageForm()
+#     if request.method == 'POST' and form.validate_on_submit():
+#         package = Packages(name=form.name.data, price=form.price.data, duration=form.duration.data)
+#         db.session.add(package)
+#         db.session.commit()
+#         print(package)
+#         return redirect('/package')
+#     return render_template('package.html', form=form)
 
-@app.route('/checkin', methods=['GET', 'POST'])
-@login_required
-def checkin():
-    form = CheckinForm()
-    if form.validate_on_submit():
-        checkin = Checkins(user_id=current_user.id, date = form.date.data)
-        db.session.add(checkin)
-        db.session.commit()
-        return ('Checked in successfully')
-    return render_template('checkin.html', form=form)
 
-@app.route('/cancel_membership')
-@login_required
-def cancel_membership():
-    member = Users.query.filter_by(id=current_user.id).first()
-    db.session.delete(member)
-    db.session.commit()
-    logout_user()
-    return redirect(url_for('index'))
+# @app.route('/cancel_membership')
+# @login_required
+# def cancel_membership():
+#     member = Users.query.filter_by(id=current_user.id).first()
+#     db.session.delete(member)
+#     db.session.commit()
+#     logout_user()
+#     return redirect(url_for('index'))
 
-@app.route('/purchase_sessions')
-@login_required
-def purchase_sessions():
-    return render_template('purchase_sessions.html')
+# @app.route('/purchase_sessions')
+# @login_required
+# def purchase_sessions():
+#     return render_template('purchase_sessions.html')
 
 
 @app.route('/logout')
