@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}View-Checkins{% endblock %}
+
+{% block nav %}
+<div class='container'>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('checkin')}}" tabindex="-1" >Check In</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('index')}}" tabindex="-1" >Home</a>
+  </li>
+</div>
+{% endblock %}
+{% block content %}
+<h2>Checkins</h2>
+<div class='container'>
+    <table>
+        <tr>
+            <th>Check-in Date</th>
+        </tr>
+        {% for checkin in checkins %}
+        <tr>
+            <td>{{ checkin.created_at.date() }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+  </div>
+{% endblock %}

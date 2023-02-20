@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
 from flask_login import current_user, login_required, login_user, logout_user,\
     LoginManager
+from sqlalchemy import and_
 
 app = Flask(__name__)
 
@@ -35,6 +36,7 @@ app.url_map.strict_slashes = False
 @app.route('/')
 def index():
     uin = helpers.logged_in(current_user)
+    
     return render_template("index.html", uin=uin)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -77,7 +79,6 @@ def login():
 @login_required
 def dashboard():
     uin = helpers.logged_in(current_user)
-
     member = Users.query.filter_by(id=current_user.id).first()
     return render_template('dashboard.html', member=member, uin=uin)
 
@@ -96,7 +97,8 @@ def checkin():
     uin = helpers.logged_in(current_user)
 
     if current_user.role != "Owner":
-        return "Please ask an official to check you in"
+        flash("Please ask an official to check you in")
+        return redirect(url_for('dashboard'))
     else:
         form = CheckinForm()
         members = Users.query.filter_by(role='Member').all()
@@ -114,6 +116,20 @@ def checkin():
 
     return render_template('checkin.html', form=form, uin=uin)
 
+@app.route('/view_checkins')
+@login_required
+def view_checkins():
+    if current_user.role != "Owner":
+        checkins = Checkins.query.filter_by(user_id=current_user.id).all()
+
+    else:
+        today = date.today()
+        start_of_day = datetime.combine(today, datetime.min.time())
+        end_of_day = datetime.combine(today, datetime.max.time())
+        checkins = Checkins.query.filter(and_(Checkins.created_at >= start_of_day, Checkins.created_at <= end_of_day)).all()
+        
+    return render_template('view_checkins.html', checkins=checkins)
+    
 
 @app.route('/update_member/<int:id>', methods=['GET', 'POST'])
 @login_required
