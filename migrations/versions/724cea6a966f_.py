@@ -83,4 +83,5 @@ def downgrade():
     op.drop_table('member')
     op.drop_table('checkins')
     op.drop_table('users')
+    op.drop_type('role_enum')
     # ### end Alembic commands ###
