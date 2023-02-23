@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 724cea6a966f
+Revision ID: 316430e41962
 Revises: 
-Create Date: 2023-02-20 16:15:51.836618
+Create Date: 2023-02-23 12:14:15.981031
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '724cea6a966f'
+revision = '316430e41962'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -83,5 +83,4 @@ def downgrade():
     op.drop_table('member')
     op.drop_table('checkins')
     op.drop_table('users')
-    op.drop_type('role_enum')
     # ### end Alembic commands ###
